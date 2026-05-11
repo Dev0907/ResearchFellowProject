@@ -10,6 +10,30 @@ interface AnalysisFormProps {
 }
 
 export default function AnalysisForm({ onAnalyze, isLoading }: AnalysisFormProps) {
+  const [loadingStep, setLoadingStep] = useState(0);
+  const steps = [
+    "Deploying Global Market Analyst...",
+    "Tier-1 VC Partner reviewing vision...",
+    "Competitor Mapper scanning markets...",
+    "Customer Skeptic stress-testing...",
+    "Distribution Strategist mapping GTM...",
+    "Moat Analyzer evaluating defensibility...",
+    "UX & Brand Director defining identity...",
+    "Strategic Synthesizer finalising report..."
+  ];
+
+  React.useEffect(() => {
+    let interval: any;
+    if (isLoading) {
+      interval = setInterval(() => {
+        setLoadingStep((prev) => (prev + 1) % steps.length);
+      }, 3000);
+    } else {
+      setLoadingStep(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   const [formData, setFormData] = useState<StartupIdea>({
     idea: '',
     problem: '',
@@ -111,17 +135,17 @@ export default function AnalysisForm({ onAnalyze, isLoading }: AnalysisFormProps
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 rounded-2xl premium-gradient text-white font-bold text-lg flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-primary/20"
+          className="w-full py-4 rounded-2xl premium-gradient font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-6 h-6 animate-spin" />
-              Agents are working...
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>{steps[loadingStep]}</span>
             </>
           ) : (
             <>
-              Start Global Analysis
-              <ArrowRight className="w-6 h-6" />
+              <Rocket className="w-5 h-5" />
+              <span>Begin Deep Analysis</span>
             </>
           )}
         </button>

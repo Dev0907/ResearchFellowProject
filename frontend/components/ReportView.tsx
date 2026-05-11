@@ -254,6 +254,62 @@ export default function ReportView({ report }: ReportViewProps) {
         </div>
       </div>
 
+      {/* Brand & Design Direction */}
+      <div className="p-8 rounded-3xl glass border-primary/10">
+        <div className="flex items-center gap-3 mb-8">
+          <Award className="w-6 h-6 text-primary" />
+          <h3 className="text-xl font-bold">Brand & Design Direction</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="space-y-4">
+            <span className="text-xs font-bold text-slate-400 uppercase">Brand Personality</span>
+            <div className="flex flex-wrap gap-2">
+              {report.brand_ux_direction?.brand_personality?.map((p: string) => (
+                <span key={p} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-sm">
+                  {p}
+                </span>
+              ))}
+            </div>
+            <p className="text-sm text-slate-400 mt-4 italic">
+              "Think {report.brand_ux_direction?.references?.join(' meets ')}"
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <span className="text-xs font-bold text-slate-400 uppercase">Visual Identity</span>
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+              <h4 className="font-bold mb-1">{report.brand_ux_direction?.design_language}</h4>
+              <div className="flex gap-2 mt-4">
+                {Object.entries(report.brand_ux_direction?.color_palette || {}).map(([key, color]: any) => (
+                  <div key={key} className="group relative">
+                    <div 
+                      className="w-10 h-10 rounded-full border border-white/20 shadow-lg" 
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {color}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <span className="text-xs font-bold text-slate-400 uppercase">Recommended UI Patterns</span>
+            <ul className="space-y-2">
+              {report.brand_ux_direction?.ui_patterns?.map((pattern: string, i: number) => (
+                <li key={i} className="text-sm text-slate-300 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  {pattern}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Brutal Truths & Success Factors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="p-8 rounded-3xl bg-rose-500/10 border border-rose-500/20">
