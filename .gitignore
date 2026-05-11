@@ -57,7 +57,7 @@ dist/
 # ============================================
 # IDE & Editors
 # ============================================
-.vscode/
+# .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
