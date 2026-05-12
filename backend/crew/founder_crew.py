@@ -1,17 +1,35 @@
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew, Process, LLM
+from crewai.tools import BaseTool
 from typing import Optional
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.sarvam_llm import SarvamLLM
 from utils.tavily_search import TavilySearch
-from langchain_core.tools import Tool
 import json
 import re
 
+from pydantic import BaseModel, Field
+
+class SearchInput(BaseModel):
+    """Input for the Search tool."""
+    query: str = Field(..., description="The search query to look up on the web. Must be a specific string.")
+
+class SearchTool(BaseTool):
+    name: str = "web_search"
+    description: str = "Search the web for real-time information about startups, competitors, markets, and trends."
+    args_schema: type[BaseModel] = SearchInput
+    tavily: Optional[TavilySearch] = None
+
+    def __init__(self, tavily: TavilySearch, **kwargs):
+        super().__init__(**kwargs)
+        self.tavily = tavily
+
+    def _run(self, query: str) -> str:
+        return self.tavily.research_topic(query)
+
 class FounderCrew:
     """
-    Multi-agent crew for startup analysis using Sarvam AI
+    Multi-agent crew for startup analysis using Groq
     Comprehensive analysis with detailed agent roles and backstories
     """
     
@@ -29,24 +47,58 @@ class FounderCrew:
         self.website = website
         self.startup_name = startup_name or "This startup"
         
-        # Initialize Sarvam AI LLM
-        self.llm = SarvamLLM(
-            temperature=0.7,
-            max_tokens=2000
-        )
+        # Initialize Groq API Keys
+        self.api_keys = [
+            os.getenv("GROQ_API_KEY"),
+            os.getenv("GROQ_API_KEY_2")
+        ]
+        self.api_keys = [k for k in self.api_keys if k]
+        self.key_index = 0
         
-        # Initialize search tool
+        # Initialize the shared LLM instance with a custom callback or just rotate manually
+        # For simplicity in CrewAI, we can assign a 'dynamic' LLM that rotates keys
+        self.llm = self._create_rotating_llm()
+        
+        # Initialize native search tool
         self.tavily = TavilySearch()
-        self.search_tool = Tool(
-            name="Search",
-            func=self.tavily.research_topic,
-            description="Useful for searching the web for information about startups, competitors, market trends, and industry insights across different countries."
+        self.search_tool = SearchTool(tavily=self.tavily)
+    
+    def _create_rotating_llm(self):
+        """Create an LLM instance that uses a custom key rotation strategy"""
+        # We can use a lambda or a wrapper if CrewAI allows, 
+        # but assigning the standard LLM and rotating its key property is easier.
+        return LLM(
+            model="groq/llama-3.3-70b-versatile",
+            api_key=self.api_keys[0],
+            temperature=0.7
         )
+
+    def _get_llm(self):
+        """Return the shared LLM after rotating its key for the next agent/call"""
+        if not self.api_keys:
+            return self.llm
+            
+        # Rotate key
+        current_key = self.api_keys[self.key_index % len(self.api_keys)]
+        self.llm.api_key = current_key
+        self.key_index += 1
+        return self.llm
+
         
         # Initialize agents
         self.agents = self._create_agents()
         self.tasks = self._create_tasks()
     
+    def _get_llm(self):
+        """Get an LLM instance, rotating keys to avoid rate limits"""
+        if not self.llm_instances:
+            # Fallback to default if no keys
+            return LLM(model="groq/llama-3.3-70b-versatile", temperature=0.7)
+            
+        llm = self.llm_instances[self.key_index % len(self.llm_instances)]
+        self.key_index += 1
+        return llm
+
     def _create_agents(self):
         """Create all specialized agents with comprehensive roles and backstories"""
         
@@ -60,7 +112,7 @@ class FounderCrew:
             You excel at spotting emerging startups globally and understanding regional nuances.
             You don't just look at today; you project market shifts and startup evolutions 10 years into the future.
             You use real-time search data to find specific companies and their latest funding/product moves.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             tools=[self.search_tool],
             verbose=True,
             allow_delegation=False
@@ -112,7 +164,7 @@ class FounderCrew:
             
             You are direct, skeptical, but fair. If the idea is strong, you say so. 
             If it's weak, you explain exactly why.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             verbose=True,
             allow_delegation=False
         )
@@ -126,7 +178,7 @@ class FounderCrew:
             backstory="""You are a competitive intelligence expert who leaves no stone unturned.
             You find the obvious players and the stealth startups in Bangalore, San Francisco, London, and beyond.
             You decode their "ideas" and project how they will compete or exit in the next 10 years.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             tools=[self.search_tool],
             verbose=True,
             allow_delegation=False
@@ -196,7 +248,7 @@ class FounderCrew:
             
             You provide 7-10 specific, realistic objections that founders MUST address.
             You represent the voice of the market - if you're not convinced, customers won't be either.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             verbose=True,
             allow_delegation=False
         )
@@ -278,7 +330,7 @@ class FounderCrew:
             
             You are practical and realistic. You call out when a GTM strategy is too expensive, 
             too slow, or doesn't match the product/market.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             verbose=True,
             allow_delegation=False
         )
@@ -390,7 +442,7 @@ class FounderCrew:
             - Recommendations for strengthening defensibility
             
             You are honest: most startups have weak moats. You call it out.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             verbose=True,
             allow_delegation=False
         )
@@ -493,7 +545,7 @@ class FounderCrew:
             
             You understand that design is a competitive advantage. Good design builds trust, 
             reduces friction, and creates emotional connection.""",
-            llm=self.llm,
+            llm=self._get_llm(),
             verbose=True,
             allow_delegation=False
         )
@@ -533,7 +585,8 @@ class FounderCrew:
                - What would need to change to address it
             
             4. **Competitive Landscape**
-               - Key competitors identified
+               - Key competitors identified (including Founders and VCs)
+               - Detailed feature comparison
                - Competitive positioning map
                - White space opportunities
                - Biggest competitive threat
@@ -553,7 +606,7 @@ class FounderCrew:
             7. **Moat Strength** (1-10)
                - Type of moat (if any)
                - Defensibility assessment
-               - Time to build moat
+               - Time to build the moat
                - Vulnerabilities
             
             8. **Brand & UX Direction**
@@ -587,12 +640,10 @@ class FounderCrew:
             - Balanced (acknowledge strengths AND weaknesses)
             - Founder-friendly (tough love, not discouragement)
             
-            You structure the output as clean, well-formatted JSON that can be easily 
-            parsed and displayed in the frontend.
+            **CRITICAL: Output the result as a valid JSON object. Ensure it contains the 'startup_name' field.**
             
-            You are the voice of reason - helping founders see their idea clearly, 
-            understand the challenges, and make informed decisions.""",
-            llm=self.llm,
+            Compile all agent insights into this structured format.""",
+            llm=self._get_llm(),
             verbose=True,
             allow_delegation=False
         )
@@ -753,13 +804,15 @@ class FounderCrew:
             1. **Direct Competitors** (3-5 companies)
                - Companies solving the exact same problem for the same customer
                - For each, provide:
-                 * Company name, founding year, funding, team size
-                 * Value proposition
-                 * Target customer (SMB/Enterprise, B2B/B2C)
-                 * Pricing model and price points
-                 * Key features
-                 * Strengths and weaknesses
-                 * Market share estimate
+                  * Company name, founding year, funding, team size
+                  * Founders (full names and backgrounds)
+                  * Key Investors & VCs (top-tier names)
+                  * Comprehensive feature list (all major capabilities)
+                  * Value proposition
+                  * Target customer (SMB/Enterprise, B2B/B2C)
+                  * Pricing model and price points
+                  * Strengths and weaknesses
+                  * Market share estimate
             
             2. **Indirect Competitors** (2-3 companies)
                - Alternative solutions to the same problem
@@ -795,7 +848,13 @@ class FounderCrew:
             - What if Google/Microsoft/Amazon entered?
             - Potential acquisition targets
             
-            Use web search to find real companies, pricing, and features. Be thorough.""",
+            **6. Existing Solutions & Granular Feature Sets**
+            - For the specific idea: {self.idea}, identify every existing company that has built even a partial solution.
+            - Document their EXACT feature sets (e.g., specific AI models used, UI components, API integrations).
+            - Identify what is 'standard' in the market vs. what is 'innovative'.
+            
+            Use web search to find real companies, pricing, founders, investors, and specific product features. Be extremely thorough and precise.
+""",
             agent=self.agents["competitor"],
             expected_output="Complete competitive landscape map with specific companies, positioning, and opportunities"
         )
@@ -1189,9 +1248,11 @@ class FounderCrew:
             - Balance strengths AND weaknesses
             - Founder-friendly tough love
             
+            **CRITICAL: Output the result as a valid JSON object. Ensure it contains the 'startup_name' field.**
+            
             Compile all agent insights into this structured format.""",
             agent=self.agents["synthesizer"],
-            expected_output="Complete structured founder report in clean JSON format"
+            expected_output="Complete structured founder report in clean JSON format containing 'startup_name' and all analysis sections."
         )
         
         return [
@@ -1212,7 +1273,8 @@ class FounderCrew:
             agents=list(self.agents.values()),
             tasks=self.tasks,
             process=Process.sequential,
-            verbose=True
+            verbose=True,
+            max_rpm=10  # Prevent slamming the Groq API even with key rotation
         )
         
         result = crew.kickoff()

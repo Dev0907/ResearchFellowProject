@@ -181,17 +181,40 @@ export default function ReportView({ report }: ReportViewProps) {
             <motion.div 
               key={i}
               whileHover={{ y: -5 }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors"
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors flex flex-col"
             >
               <div className="flex justify-between items-start mb-3">
                 <h4 className="font-bold text-lg">{comp.name || comp}</h4>
-                {comp.funding && <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">{comp.funding}</span>}
+                <div className="flex flex-col items-end gap-1">
+                  {comp.funding && <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">{comp.funding}</span>}
+                  {comp.founding_year && <span className="text-[9px] text-slate-500">{comp.founding_year}</span>}
+                </div>
               </div>
-              <p className="text-sm text-slate-400 line-clamp-3 mb-4">{comp.description || comp.value_proposition}</p>
-              <div className="flex flex-wrap gap-1">
-                {comp.features?.slice(0, 3).map((f: string) => (
-                  <span key={f} className="text-[9px] px-2 py-0.5 bg-white/5 rounded-md">{f}</span>
-                ))}
+              
+              <p className="text-sm text-slate-300 mb-4 line-clamp-2">{comp.description || comp.value_proposition}</p>
+              
+              {/* Founders & VCs */}
+              <div className="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-white/5">
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Founders</span>
+                  <p className="text-xs text-slate-300 line-clamp-2">{comp.founders || 'N/A'}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Key VCs</span>
+                  <p className="text-xs text-slate-300 line-clamp-2">{comp.key_investors || comp.vcs || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Comprehensive Features */}
+              <div className="mt-auto pt-4 border-t border-white/5">
+                <span className="text-[10px] font-bold uppercase text-slate-500 block mb-2">Core Capabilities</span>
+                <div className="flex flex-wrap gap-1">
+                  {(comp.features || comp.comprehensive_features)?.slice(0, 6).map((f: string) => (
+                    <span key={f} className="text-[9px] px-2 py-0.5 bg-primary/10 text-primary rounded-md border border-primary/20">
+                      {f}
+                    </span>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}

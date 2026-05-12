@@ -10,7 +10,6 @@
 .env.*.local
 *.env
 !.env.example
-
 # ============================================
 # Python Byte-compiled / Optimized
 # ============================================
@@ -56,6 +55,7 @@ ENV/
 env.bak/
 venv.bak/
 pythonenv*/
+research/
 
 # ============================================
 # Testing & Coverage
