@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Loader2, Globe, Users, Target, Info } from 'lucide-react';
+import { Sparkles, ArrowRight, Loader2, Globe, Users, Target, Info, Rocket } from 'lucide-react';
 import { StartupIdea } from '@/lib/api';
 
 interface AnalysisFormProps {
