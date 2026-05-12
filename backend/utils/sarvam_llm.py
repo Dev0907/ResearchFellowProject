@@ -2,8 +2,8 @@
 Custom LangChain LLM wrapper for Sarvam AI API
 """
 from typing import Any, List, Optional
-from langchain.llms.base import LLM
-from langchain.callbacks.manager import CallbackManagerForLLMRun
+from langchain_core.language_models.llms import LLM
+from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 import requests
 import os
 

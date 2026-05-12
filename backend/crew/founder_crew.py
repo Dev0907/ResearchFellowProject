@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.sarvam_llm import SarvamLLM
 from utils.tavily_search import TavilySearch
-from langchain.tools import Tool
+from langchain_core.tools import Tool
 import json
 import re
 
