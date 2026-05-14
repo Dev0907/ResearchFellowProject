@@ -3,6 +3,10 @@ from crewai.tools import BaseTool
 from typing import Optional
 import os
 import sys
+import litellm
+
+litellm.drop_params = True
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.tavily_search import TavilySearch
 import json
