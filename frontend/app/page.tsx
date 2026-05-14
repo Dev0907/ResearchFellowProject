@@ -125,7 +125,7 @@ export default function Home() {
       )}
 
       <footer className="border-t border-white/5 py-12 text-center text-slate-500 text-sm">
-        <p>&copy; 2026 Founder Simulator. Powered by Groq & Tavily.</p>
+        <p>&copy; 2026 Founder Simulator. Powered by Cohere & Tavily.</p>
       </footer>
     </main>
   );
