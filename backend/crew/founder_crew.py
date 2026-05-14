@@ -1,10 +1,11 @@
-from crewai import Agent, Task, Crew, Process, LLM
+from crewai import Agent, Task, Crew, Process
 from crewai.tools import BaseTool
 from typing import Optional
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.tavily_search import TavilySearch
+from langchain_groq import ChatGroq
 import json
 import re
 
@@ -68,22 +69,26 @@ class FounderCrew:
     
     def _create_rotating_llm(self):
         """Create an LLM instance that uses a custom key rotation strategy"""
-        return LLM(
-            model="groq/llama-3.3-70b-versatile",
+        return ChatGroq(
+            model_name=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
             api_key=self.api_keys[0] if self.api_keys else None,
             temperature=0.7
         )
 
     def _get_llm(self):
-        """Return the shared LLM after rotating its key for the next agent/call"""
+        """Return a new LLM instance with a rotated key for the next agent"""
         if not self.api_keys:
             return self.llm
             
         # Rotate key
         current_key = self.api_keys[self.key_index % len(self.api_keys)]
-        self.llm.api_key = current_key
         self.key_index += 1
-        return self.llm
+        
+        return ChatGroq(
+            model_name=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+            api_key=current_key,
+            temperature=0.7
+        )
 
     def _create_agents(self):
         """Create all specialized agents with comprehensive roles and backstories"""
