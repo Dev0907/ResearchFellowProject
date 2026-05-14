@@ -47,10 +47,9 @@ class FounderCrew:
         self.website = website
         self.startup_name = startup_name or "This startup"
         
-        # Initialize Groq API Keys
+        # Initialize Cohere API Keys
         self.api_keys = [
-            os.getenv("GROQ_API_KEY"),
-            os.getenv("GROQ_API_KEY_2")
+            os.getenv("COHERE_API_KEY")
         ]
         self.api_keys = [k for k in self.api_keys if k]
         self.key_index = 0
@@ -69,7 +68,7 @@ class FounderCrew:
     def _create_rotating_llm(self):
         """Create an LLM instance that uses a custom key rotation strategy"""
         return LLM(
-            model="groq/llama-3.3-70b-versatile",
+            model=os.getenv("COHERE_MODEL", "cohere/command-r"),
             api_key=self.api_keys[0] if self.api_keys else None,
             temperature=0.7
         )
