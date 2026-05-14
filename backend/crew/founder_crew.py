@@ -3,10 +3,6 @@ from crewai.tools import BaseTool
 from typing import Optional
 import os
 import sys
-import litellm
-
-litellm.drop_params = True
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.tavily_search import TavilySearch
 import json
@@ -51,9 +47,10 @@ class FounderCrew:
         self.website = website
         self.startup_name = startup_name or "This startup"
         
-        # Initialize Cohere API Keys
+        # Initialize Groq API Keys
         self.api_keys = [
-            os.getenv("COHERE_API_KEY")
+            os.getenv("GROQ_API_KEY"),
+            os.getenv("GROQ_API_KEY_2")
         ]
         self.api_keys = [k for k in self.api_keys if k]
         self.key_index = 0
@@ -72,7 +69,7 @@ class FounderCrew:
     def _create_rotating_llm(self):
         """Create an LLM instance that uses a custom key rotation strategy"""
         return LLM(
-            model=os.getenv("COHERE_MODEL", "cohere/command-r"),
+            model="groq/llama-3.3-70b-versatile",
             api_key=self.api_keys[0] if self.api_keys else None,
             temperature=0.7
         )
