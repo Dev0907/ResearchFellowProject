@@ -7,7 +7,9 @@ import {
 } from 'recharts';
 import { 
   Shield, AlertTriangle, TrendingUp, Users, 
-  Zap, Globe, Award, Info, CheckCircle2
+  Zap, Globe, Award, Info, CheckCircle2,
+  Rocket, Search, Target, Briefcase, MousePointer2,
+  Palette, Eye, LayoutGrid, Layers
 } from 'lucide-react';
 
 interface ReportViewProps {
@@ -29,7 +31,8 @@ export default function ReportView({ report }: ReportViewProps) {
     moat_strength,
     survival_probability,
     brutal_truth,
-    success_factors
+    success_factors,
+    brand_ux_direction
   } = report;
 
   // Data for Market Scores Bar Chart
@@ -57,12 +60,16 @@ export default function ReportView({ report }: ReportViewProps) {
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Biggest Strength</span>
-              <p className="mt-1 text-sm">{executive_summary?.biggest_strength}</p>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2 mb-1">
+                <TrendingUp className="w-3 h-3" /> Biggest Strength
+              </span>
+              <p className="text-sm">{executive_summary?.biggest_strength}</p>
             </div>
             <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-              <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Biggest Weakness</span>
-              <p className="mt-1 text-sm">{executive_summary?.biggest_weakness}</p>
+              <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2 mb-1">
+                <AlertTriangle className="w-3 h-3" /> Biggest Weakness
+              </span>
+              <p className="text-sm">{executive_summary?.biggest_weakness}</p>
             </div>
           </div>
         </div>
@@ -105,7 +112,38 @@ export default function ReportView({ report }: ReportViewProps) {
             <TrendingUp className="w-6 h-6 text-primary" />
             <h3 className="text-xl font-bold">Market Dynamics</h3>
           </div>
-          <div className="h-64 w-full">
+          
+          <div className="grid grid-cols-1 gap-4">
+             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Market Size (TAM / SAM / SOM)</span>
+                <div className="grid grid-cols-3 gap-2">
+                   <div className="text-center p-2 bg-white/5 rounded-lg">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">TAM</p>
+                      <p className="text-xs font-medium">{market_opportunity?.market_size_tam_sam_som?.tam || 'N/A'}</p>
+                   </div>
+                   <div className="text-center p-2 bg-white/5 rounded-lg border border-primary/20">
+                      <p className="text-[10px] text-primary font-bold uppercase">SAM</p>
+                      <p className="text-xs font-medium">{market_opportunity?.market_size_tam_sam_som?.sam || 'N/A'}</p>
+                   </div>
+                   <div className="text-center p-2 bg-white/5 rounded-lg">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">SOM</p>
+                      <p className="text-xs font-medium">{market_opportunity?.market_size_tam_sam_som?.som || 'N/A'}</p>
+                   </div>
+                </div>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                   <span className="text-[10px] text-slate-500 font-bold uppercase">Growth Rate</span>
+                   <p className="text-sm font-medium">{market_opportunity?.growth_rate || 'N/A'}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                   <span className="text-[10px] text-slate-500 font-bold uppercase">Category</span>
+                   <p className="text-sm font-medium">{market_opportunity?.category || 'Startup'}</p>
+                </div>
+             </div>
+          </div>
+
+          <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={marketData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -123,15 +161,16 @@ export default function ReportView({ report }: ReportViewProps) {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm border-b border-white/5 pb-2">
               <span className="text-slate-400">Timing Assessment:</span>
               <span className="font-medium">{market_opportunity?.timing}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm border-b border-white/5 pb-2">
               <span className="text-slate-400">Competitive Intensity:</span>
               <span className="font-medium">{market_opportunity?.competitive_intensity}</span>
             </div>
+            <p className="text-xs text-slate-500 italic">{market_opportunity?.assessment}</p>
           </div>
         </div>
 
@@ -147,13 +186,17 @@ export default function ReportView({ report }: ReportViewProps) {
               </span>
             ))}
           </div>
-          <div className="p-4 rounded-2xl bg-white/5 space-y-4">
-            <p className="text-sm text-slate-300">
-              <span className="font-bold text-white">Outlook:</span> {moat_strength?.time_to_build} to build a defensible moat.
-            </p>
-            <div className="space-y-2">
+          <div className="p-6 rounded-2xl bg-white/5 space-y-6">
+            <div>
+              <span className="text-xs font-bold text-slate-400 uppercase block mb-2">Moat Assessment</span>
+              <p className="text-sm text-slate-300">
+                <span className="font-bold text-white">Outlook:</span> {moat_strength?.time_to_build} to build a defensible moat.
+              </p>
+            </div>
+            
+            <div className="space-y-3">
               <span className="text-xs font-bold text-slate-400 uppercase">Key Recommendations:</span>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {moat_strength?.recommendations?.map((rec: string, i: number) => (
                   <li key={i} className="text-sm flex gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -161,6 +204,94 @@ export default function ReportView({ report }: ReportViewProps) {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {moat_strength?.vulnerabilities?.length > 0 && (
+              <div className="pt-4 border-t border-white/5 space-y-2">
+                <span className="text-xs font-bold text-rose-400 uppercase">Vulnerabilities</span>
+                <div className="flex flex-wrap gap-2">
+                  {moat_strength.vulnerabilities.map((v: string, i: number) => (
+                    <span key={i} className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <div className="w-1 h-1 rounded-full bg-rose-500" /> {v}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Distribution & Growth Section */}
+      <div className="p-8 rounded-3xl glass">
+        <div className="flex items-center gap-3 mb-8">
+          <Rocket className="w-6 h-6 text-primary" />
+          <h3 className="text-xl font-bold">Go-To-Market & Distribution</h3>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 space-y-4">
+            <span className="text-xs font-bold text-slate-400 uppercase">Recommended Channels</span>
+            <div className="space-y-3">
+              {distribution_strategy?.recommended_channels?.map((channel: any, i: number) => (
+                <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] text-primary font-bold">
+                      {i + 1}
+                    </div>
+                    <p className="text-sm font-bold">{channel.channel || channel}</p>
+                  </div>
+                  <p className="text-[10px] text-slate-300 mb-2 leading-relaxed">{channel.rationale || 'High-growth potential'}</p>
+                  <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                     <span className="text-[9px] text-slate-500 uppercase">Scalability: {channel.scalability || 'High'}</span>
+                     <span className="text-[9px] text-primary font-bold">{channel.time_to_results || 'Fast'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+              <div className="flex items-center gap-2 text-primary">
+                <Target className="w-5 h-5" />
+                <h4 className="font-bold">Cold-Start Strategy</h4>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                {distribution_strategy?.cold_start_strategy}
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+              <div className="flex items-center gap-2 text-emerald-400">
+                <Zap className="w-5 h-5" />
+                <h4 className="font-bold">Growth Loops</h4>
+              </div>
+              <ul className="space-y-2">
+                {distribution_strategy?.growth_loops?.map((loop: string, i: number) => (
+                  <li key={i} className="text-sm text-slate-300 flex items-start gap-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                    {loop}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="md:col-span-2 p-6 rounded-2xl bg-primary/5 border border-primary/20 flex justify-between items-center">
+               <div className="text-center">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">Est. CAC (Total)</span>
+                  <p className="text-xl font-bold text-primary">{distribution_strategy?.estimated_cac_total || distribution_strategy?.estimated_cac}</p>
+               </div>
+               <div className="h-8 w-px bg-white/10" />
+               <div className="text-center">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">Est. LTV (Total)</span>
+                  <p className="text-xl font-bold text-emerald-400">{distribution_strategy?.estimated_ltv_total || distribution_strategy?.estimated_ltv}</p>
+               </div>
+               <div className="h-8 w-px bg-white/10" />
+               <div className="text-center">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">LTV:CAC Ratio</span>
+                  <p className="text-xl font-bold text-amber-400">Target 3:1+</p>
+               </div>
             </div>
           </div>
         </div>
@@ -173,7 +304,7 @@ export default function ReportView({ report }: ReportViewProps) {
             <Globe className="w-6 h-6 text-primary" />
             <h3 className="text-xl font-bold">Global Competitive Landscape</h3>
           </div>
-          <span className="text-xs text-slate-400 uppercase">Real-time Data Active</span>
+          <span className="text-xs text-slate-400 uppercase">Deep Analysis Active</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -200,8 +331,28 @@ export default function ReportView({ report }: ReportViewProps) {
                   <p className="text-xs text-slate-300 line-clamp-2">{comp.founders || 'N/A'}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Key VCs</span>
-                  <p className="text-xs text-slate-300 line-clamp-2">{comp.key_investors || comp.vcs || 'N/A'}</p>
+                  <span className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Market Cap / Valuation</span>
+                  <p className="text-xs text-slate-300 line-clamp-1">{comp.market_cap || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Upcoming Goals */}
+              <div className="mb-4 pt-4 border-t border-white/5">
+                <span className="text-[10px] font-bold uppercase text-slate-500 block mb-1 flex items-center gap-1">
+                   <Target className="w-3 h-3" /> Upcoming Goals
+                </span>
+                <p className="text-xs text-slate-300 line-clamp-2 italic">"{comp.upcoming_goals || 'No public roadmap available'}"</p>
+              </div>
+
+              {/* Strengths & Weaknesses */}
+              <div className="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-white/5">
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-emerald-500 block mb-1">Strengths</span>
+                  <p className="text-[10px] text-slate-400 line-clamp-2">{comp.strengths || 'N/A'}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-rose-500 block mb-1">Weaknesses</span>
+                  <p className="text-[10px] text-slate-400 line-clamp-2">{comp.weaknesses || 'N/A'}</p>
                 </div>
               </div>
 
@@ -219,6 +370,34 @@ export default function ReportView({ report }: ReportViewProps) {
             </motion.div>
           ))}
         </div>
+
+        {/* Indirect & Opportunities */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-white/5">
+           <div className="space-y-4">
+              <h4 className="text-sm font-bold flex items-center gap-2 text-slate-400">
+                 <Layers className="w-4 h-4" /> Indirect Competitors
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                 {competitive_landscape?.indirect_competitors?.map((comp: string, i: number) => (
+                    <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-slate-300">
+                       {comp}
+                    </span>
+                 ))}
+              </div>
+           </div>
+           <div className="space-y-4">
+              <h4 className="text-sm font-bold flex items-center gap-2 text-emerald-400">
+                 <Search className="w-4 h-4" /> White Space Opportunities
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                 {competitive_landscape?.white_space_opportunities?.map((opp: string, i: number) => (
+                    <span key={i} className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-400">
+                       {opp}
+                    </span>
+                 ))}
+              </div>
+           </div>
+        </div>
         
         <div className="mt-8 p-6 rounded-2xl border border-rose-500/20 bg-rose-500/5">
           <div className="flex items-center gap-2 mb-2">
@@ -232,10 +411,16 @@ export default function ReportView({ report }: ReportViewProps) {
       {/* Investor & Customer Reality */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <h3 className="text-xl font-bold flex items-center gap-3 px-4">
-            <Zap className="w-6 h-6 text-amber-500" />
-            Investor Hardball
-          </h3>
+          <div className="flex items-center justify-between px-4">
+             <h3 className="text-xl font-bold flex items-center gap-3">
+               <Zap className="w-6 h-6 text-amber-500" />
+               Investor Hardball
+             </h3>
+             <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-1 rounded-lg font-bold uppercase tracking-wider">
+                YC/a16z Mode
+             </span>
+          </div>
+          
           <div className="space-y-4">
             {investor_concerns?.map((item: any, i: number) => (
               <div key={i} className="p-6 rounded-2xl glass border-white/5">
@@ -256,6 +441,26 @@ export default function ReportView({ report }: ReportViewProps) {
               </div>
             ))}
           </div>
+
+          {/* Comparable Companies */}
+          <div className="mt-8 p-6 rounded-2xl bg-white/5 border border-white/10">
+             <h4 className="text-sm font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+                <Briefcase className="w-4 h-4" /> Comparable Companies
+             </h4>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {report.comparable_companies?.map((comp: any, i: number) => (
+                   <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="flex justify-between items-center mb-1">
+                         <p className="text-sm font-bold">{comp.name}</p>
+                         <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                            comp.status === 'Success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                         }`}>{comp.status}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">{comp.reason}</p>
+                   </div>
+                ))}
+             </div>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -266,9 +471,17 @@ export default function ReportView({ report }: ReportViewProps) {
           <div className="space-y-4">
             {customer_objections?.map((item: any, i: number) => (
               <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/5">
-                <h5 className="font-bold mb-1">"{item.objection}"</h5>
-                <p className="text-sm text-slate-400 mb-3 italic">{item.category}</p>
+                <div className="flex justify-between items-start mb-2">
+                  <h5 className="font-bold mb-1">"{item.objection}"</h5>
+                  <span className={`text-[9px] px-2 py-0.5 rounded-full ${
+                    item.severity === 'deal-breaker' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
+                  }`}>
+                    {item.severity}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 mb-3 uppercase font-bold tracking-wider">{item.category}</p>
                 <div className="text-sm text-slate-200 bg-white/5 p-3 rounded-xl border border-white/5">
+                  <span className="text-[10px] text-primary font-bold uppercase block mb-1">The Response:</span>
                   {item.how_to_address}
                 </div>
               </div>
@@ -280,31 +493,37 @@ export default function ReportView({ report }: ReportViewProps) {
       {/* Brand & Design Direction */}
       <div className="p-8 rounded-3xl glass border-primary/10">
         <div className="flex items-center gap-3 mb-8">
-          <Award className="w-6 h-6 text-primary" />
-          <h3 className="text-xl font-bold">Brand & Design Direction</h3>
+          <Palette className="w-6 h-6 text-primary" />
+          <h3 className="text-xl font-bold">Brand & Design Strategy</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
-            <span className="text-xs font-bold text-slate-400 uppercase">Brand Personality</span>
+            <div className="flex items-center gap-2 text-slate-400">
+               <Eye className="w-4 h-4" />
+               <span className="text-xs font-bold uppercase">Brand Personality</span>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {report.brand_ux_direction?.brand_personality?.map((p: string) => (
+              {brand_ux_direction?.brand_personality?.map((p: string) => (
                 <span key={p} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-sm">
                   {p}
                 </span>
               ))}
             </div>
             <p className="text-sm text-slate-400 mt-4 italic">
-              "Think {report.brand_ux_direction?.references?.join(' meets ')}"
+              "Think {brand_ux_direction?.references?.join(' meets ')}"
             </p>
           </div>
 
           <div className="space-y-4">
-            <span className="text-xs font-bold text-slate-400 uppercase">Visual Identity</span>
+            <div className="flex items-center gap-2 text-slate-400">
+               <LayoutGrid className="w-4 h-4" />
+               <span className="text-xs font-bold uppercase">Visual Identity</span>
+            </div>
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="font-bold mb-1">{report.brand_ux_direction?.design_language}</h4>
+              <h4 className="font-bold mb-1">{brand_ux_direction?.design_language}</h4>
               <div className="flex gap-2 mt-4">
-                {Object.entries(report.brand_ux_direction?.color_palette || {}).map(([key, color]: any) => (
+                {Object.entries(brand_ux_direction?.color_palette || {}).map(([key, color]: any) => (
                   <div key={key} className="group relative">
                     <div 
                       className="w-10 h-10 rounded-full border border-white/20 shadow-lg" 
@@ -320,9 +539,12 @@ export default function ReportView({ report }: ReportViewProps) {
           </div>
 
           <div className="space-y-4">
-            <span className="text-xs font-bold text-slate-400 uppercase">Recommended UI Patterns</span>
+            <div className="flex items-center gap-2 text-slate-400">
+               <Layers className="w-4 h-4" />
+               <span className="text-xs font-bold uppercase">UI Patterns</span>
+            </div>
             <ul className="space-y-2">
-              {report.brand_ux_direction?.ui_patterns?.map((pattern: string, i: number) => (
+              {brand_ux_direction?.ui_patterns?.map((pattern: string, i: number) => (
                 <li key={i} className="text-sm text-slate-300 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                   {pattern}
@@ -335,12 +557,15 @@ export default function ReportView({ report }: ReportViewProps) {
 
       {/* Brutal Truths & Success Factors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-8 rounded-3xl bg-rose-500/10 border border-rose-500/20">
+        <div className="p-8 rounded-3xl bg-rose-500/10 border border-rose-500/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+             <AlertTriangle className="w-16 h-16 text-rose-500" />
+          </div>
           <h3 className="text-xl font-bold text-rose-400 mb-6 flex items-center gap-3">
             <AlertTriangle className="w-6 h-6" />
             The Brutal Truth
           </h3>
-          <ul className="space-y-4">
+          <ul className="space-y-4 relative z-10">
             {brutal_truth?.map((truth: string, i: number) => (
               <li key={i} className="flex gap-4 items-start text-slate-300">
                 <span className="w-6 h-6 rounded-full bg-rose-500/20 flex items-center justify-center shrink-0 text-rose-500 font-bold text-xs">
@@ -352,12 +577,15 @@ export default function ReportView({ report }: ReportViewProps) {
           </ul>
         </div>
 
-        <div className="p-8 rounded-3xl bg-emerald-500/10 border border-emerald-500/20">
+        <div className="p-8 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+             <CheckCircle2 className="w-16 h-16 text-emerald-500" />
+          </div>
           <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-3">
             <CheckCircle2 className="w-6 h-6" />
             Critical Success Factors
           </h3>
-          <ul className="space-y-4">
+          <ul className="space-y-4 relative z-10">
             {success_factors?.map((factor: string, i: number) => (
               <li key={i} className="flex gap-4 items-start text-slate-300">
                 <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 text-emerald-400 font-bold text-xs">

@@ -56,20 +56,21 @@ class FounderCrew:
         self.key_index = 0
         
         # Initialize the shared LLM instance with a custom callback or just rotate manually
-        # For simplicity in CrewAI, we can assign a 'dynamic' LLM that rotates keys
         self.llm = self._create_rotating_llm()
         
         # Initialize native search tool
         self.tavily = TavilySearch()
         self.search_tool = SearchTool(tavily=self.tavily)
+        
+        # Initialize agents and tasks
+        self.agents = self._create_agents()
+        self.tasks = self._create_tasks()
     
     def _create_rotating_llm(self):
         """Create an LLM instance that uses a custom key rotation strategy"""
-        # We can use a lambda or a wrapper if CrewAI allows, 
-        # but assigning the standard LLM and rotating its key property is easier.
         return LLM(
             model="groq/llama-3.3-70b-versatile",
-            api_key=self.api_keys[0],
+            api_key=self.api_keys[0] if self.api_keys else None,
             temperature=0.7
         )
 
@@ -83,21 +84,6 @@ class FounderCrew:
         self.llm.api_key = current_key
         self.key_index += 1
         return self.llm
-
-        
-        # Initialize agents
-        self.agents = self._create_agents()
-        self.tasks = self._create_tasks()
-    
-    def _get_llm(self):
-        """Get an LLM instance, rotating keys to avoid rate limits"""
-        if not self.llm_instances:
-            # Fallback to default if no keys
-            return LLM(model="groq/llama-3.3-70b-versatile", temperature=0.7)
-            
-        llm = self.llm_instances[self.key_index % len(self.llm_instances)]
-        self.key_index += 1
-        return llm
 
     def _create_agents(self):
         """Create all specialized agents with comprehensive roles and backstories"""
@@ -798,6 +784,7 @@ class FounderCrew:
             
             **Your Mission:**
             Find ALL competitors - obvious and hidden. Leave no stone unturned.
+            Use web search to find real companies, pricing, founders, investors, and specific product features.
             
             **Discovery Process:**
             
@@ -805,7 +792,9 @@ class FounderCrew:
                - Companies solving the exact same problem for the same customer
                - For each, provide:
                   * Company name, founding year, funding, team size
+                  * Market Cap or Latest Valuation (if public or known)
                   * Founders (full names and backgrounds)
+                  * Upcoming Goals (product roadmap, expansion plans, stated objectives)
                   * Key Investors & VCs (top-tier names)
                   * Comprehensive feature list (all major capabilities)
                   * Value proposition
@@ -853,7 +842,7 @@ class FounderCrew:
             - Document their EXACT feature sets (e.g., specific AI models used, UI components, API integrations).
             - Identify what is 'standard' in the market vs. what is 'innovative'.
             
-            Use web search to find real companies, pricing, founders, investors, and specific product features. Be extremely thorough and precise.
+            Be extremely thorough and precise. Use the search tool to find specific details about founders and their stated goals.
 """,
             agent=self.agents["competitor"],
             expected_output="Complete competitive landscape map with specific companies, positioning, and opportunities"
@@ -1174,7 +1163,12 @@ class FounderCrew:
               }},
               "market_opportunity": {{
                 "score": X,
-                "market_size": "...",
+                "category": "...",
+                "market_size_tam_sam_som": {{
+                   "tam": "...",
+                   "sam": "...",
+                   "som": "..."
+                }},
                 "growth_rate": "...",
                 "timing": "...",
                 "competitive_intensity": "...",
@@ -1188,8 +1182,29 @@ class FounderCrew:
                   "how_to_address": "..."
                 }}
               ],
+              "comparable_companies": [
+                 {{
+                    "name": "...",
+                    "status": "Success/Failed",
+                    "reason": "..."
+                 }}
+              ],
               "competitive_landscape": {{
-                "direct_competitors": [...],
+                "direct_competitors": [
+                  {{
+                    "name": "...",
+                    "founding_year": "...",
+                    "funding": "...",
+                    "market_cap": "...",
+                    "founders": "...",
+                    "upcoming_goals": "...",
+                    "key_investors": "...",
+                    "features": ["...", "..."],
+                    "value_proposition": "...",
+                    "strengths": "...",
+                    "weaknesses": "..."
+                  }}
+                ],
                 "indirect_competitors": [...],
                 "white_space_opportunities": [...],
                 "biggest_threat": "..."
@@ -1203,10 +1218,18 @@ class FounderCrew:
                 }}
               ],
               "distribution_strategy": {{
-                "recommended_channels": [...],
+                "recommended_channels": [
+                   {{
+                      "channel": "...",
+                      "rationale": "...",
+                      "estimated_cac": "...",
+                      "scalability": "...",
+                      "time_to_results": "..."
+                   }}
+                ],
                 "cold_start_strategy": "...",
-                "estimated_cac": "...",
-                "estimated_ltv": "...",
+                "estimated_cac_total": "...",
+                "estimated_ltv_total": "...",
                 "growth_loops": [...]
               }},
               "moat_strength": {{
@@ -1219,7 +1242,12 @@ class FounderCrew:
               "brand_ux_direction": {{
                 "brand_personality": [...],
                 "design_language": "...",
-                "color_palette": {{...}},
+                "color_palette": {{
+                   "primary": "#...",
+                   "secondary": "#...",
+                   "accent": "#...",
+                   "background": "#..."
+                }},
                 "ui_patterns": [...],
                 "references": [...]
               }},
@@ -1248,7 +1276,7 @@ class FounderCrew:
             - Balance strengths AND weaknesses
             - Founder-friendly tough love
             
-            **CRITICAL: Output the result as a valid JSON object. Ensure it contains the 'startup_name' field.**
+            **CRITICAL: Output the result as a valid JSON object. Ensure it contains the 'startup_name' field. Ensure ALL competitor fields (market_cap, founders, upcoming_goals) and ALL market sizing fields (tam, sam, som) are populated.**
             
             Compile all agent insights into this structured format.""",
             agent=self.agents["synthesizer"],
